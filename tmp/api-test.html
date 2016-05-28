@@ -1,0 +1,133 @@
+   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
+
+   <script>
+
+   
+
+     $(document).ready(function(){
+
+     
+
+     /*
+
+      jQuery.ajax({
+
+        url: 'http://example.localhost/articles/19',
+
+        type: "DELETE",
+
+        success: function(data) {
+
+          console.log(data);
+
+        },
+
+        error: function(data) {
+
+          console.log(data);
+
+        }
+
+      });
+
+      */
+
+
+
+      jQuery.ajax({
+
+        url: 'http://example.localhost/articles',
+
+        type: "GET",
+
+        //contentType: "application/json",
+
+        contentType: "application/xml",
+
+        success: function(data) {
+
+          console.log(data);
+
+        },
+
+        error: function(data) {
+
+          console.log(data);
+
+        }
+
+      });
+
+
+
+      /*
+
+      jQuery.ajax({
+
+        url: 'http://example.localhost/articles',
+
+        type: "POST",
+
+        contentType: "application/xml",
+
+        //contentType: "application/json",
+
+        processData: "false",
+
+        data: "<root><title>Integrating Advanced Spring Framework Features with Magnolia CMS</title><url>http://www.developer.com/java/web/integrating-advanced-spring-framework-features-with-magnolia-cms.html</url><date>2010-12-13</date></root>",
+
+        // data:'{"title":"Integrating Advanced Spring Framework Features with Magnolia CMS","url":"http://www.developer.com/java/web/integrating-advanced-spring-framework-features-with-magnolia-cms.html","date":"2010-12-13"}',
+
+        success: function(data) {
+
+          console.log(data);
+
+        },
+
+        error: function(data) {
+
+          console.log(data);
+
+        }
+
+      });
+
+      */
+
+      
+
+      /*
+
+      jQuery.ajax({
+
+        url: 'http://example.localhost/articles/19',
+
+        type: "PUT",
+
+        contentType: "application/json",
+
+        processData: "false",
+
+        data:'{"title":"Getting Started with MongoDB and PHP","url":"http://devzone.zend.com/1730/getting-started-with-mongodb-and-php/","date":"2010-06-07"}',
+
+        success: function(data) {
+
+          console.log(data);
+
+        },
+
+        error: function(data) {
+
+          console.log(data);
+
+        }
+
+      });
+
+      */
+
+    });
+
+   </script>
+
+   
