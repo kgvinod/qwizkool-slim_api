@@ -409,7 +409,7 @@ $app->get('/qwizbooks/', function ($request, $response, $args) {
 });
 
 // handle GET requests for /qwizbook/:id
-$app->get('/qwizbook[/{id}]', function ($request, $response, $args) {
+$app->get('/qwizbooks[/{id}]', function ($request, $response, $args) {
 
     ChromePhp::log("app->get() : url:/qwizbook/".$args['id']);                   
 
@@ -529,17 +529,15 @@ $body =
 
 });
 
-/*
+
 
 // handle PUT requests for /qwizbook
-
-$app->put('/qwizbooks/:id/', 'authenticate', function ($id) use ($app) {
+$app->put('/qwizbooks[/{id}]', function ($request, $response, $args) {
 
     debug_to_console ("app->put() : url:/qwizbooks/".$id);                   
     
     try {
  
-        $request = $app->request();
         $mediaType = $request->getMediaType();
         $body = $request->getBody();
         
@@ -548,7 +546,7 @@ $app->put('/qwizbooks/:id/', 'authenticate', function ($id) use ($app) {
             $input = json_decode($body)->qwizbook;
         }
 
-        $qwizbook = R::findOne('qwizbook', 'id=?', array($id));
+        $qwizbook = R::findOne('qwizbook', 'id=?', array($args['id']));
 
         if ($qwizbook) {
 
@@ -619,7 +617,7 @@ $app->put('/qwizbooks/:id/', 'authenticate', function ($id) use ($app) {
            
             if ($mediaType == 'application/json') {
 
-                $app->response()->header('Content-Type', 'application/json');
+                $response = $response->withHeader('Content-Type', 'application/json');
                 echo q_export(json_encode(R::exportAll($qwizbook)));
             }
            
@@ -631,32 +629,32 @@ $app->put('/qwizbooks/:id/', 'authenticate', function ($id) use ($app) {
 
     } catch (ResourceNotFoundException $e) {
 
-        $app->response()->status(404);
+        $response = $response->withStatus(404);
 
     } catch (Exception $e) {
 
-        $app->response()->status(400);
-        $app->response()->header('X-Status-Reason', ' [file:] ' . $e->getFile() . ' [line:] ' . $e->getLine() . ":" . $e->getMessage());
+        $response = $response->withStatus(400);
+        $response = $response->withHeader('X-Status-Reason', ' [file:] ' . $e->getFile() . ' [line:] ' . $e->getLine() . ":" . $e->getMessage());
     }
+
+    return $response;	
 
 });
 
 
 
 // handle DELETE requests for /qwizbook
-$app->delete('/qwizbooks/:id', 'authenticate', function ($id) use ($app) {
+$app->delete('/qwizbooks[/{id}]', function ($request, $response, $args) {
 
-    debug_to_console ("app->delete() : url:/qwizbooks/".$id);                   
     
     try {
 
-        $request = $app->request();
-        $qwizbook = R::findOne('qwizbook', 'id=?', array($id));
+        $qwizbook = R::findOne('qwizbook', 'id=?', array($args['id']));
 
         if ($qwizbook) {
 
             R::trash($qwizbook);
-            $app->response()->status(204);
+            $response = $response->withStatus(204);
 
         } else {
 
@@ -665,17 +663,19 @@ $app->delete('/qwizbooks/:id', 'authenticate', function ($id) use ($app) {
 
     } catch (ResourceNotFoundException $e) {
 
-        $app->response()->status(404);
+        $response = $response->withStatus(404);
 
     } catch (Exception $e) {
 
-        $app->response()->status(400);
-        $app->response()->header('X-Status-Reason', $e->getMessage());
+        $response = $response->withStatus(400);
+        $response = $response->withHeader('X-Status-Reason', 'line ' . $e->getLine() . ":" . $e->getMessage());
     }
+    
+    return $response;	
 
 });
 
-*/
+
 
 // run
 $app->run();
