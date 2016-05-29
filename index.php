@@ -12,12 +12,14 @@
  * @copyright
  * copyright (c) Qwizkool.com
  */
+// Non-composer loads
+require 'vendor/redbean/rb.php';
 
 // load required files (composer)
 require 'vendor/autoload.php';
 
-// Non-composer loads
-require 'vendor/redbean/rb.php';
+// Set teh logfile
+//$logfile = 'logs/qkool.log.'.time();
 
 // Set teh logfile
 //$logfile = 'logs/qkool.log.'.time();
@@ -77,28 +79,26 @@ R::setup('sqlite:qwizkool.db'); //sqlite
 //echo "db setup done ..\r\n";
 debug_to_console( "******************* Start **************" );
 
+debug_to_console( "main() : Slim app created" );
 
-$app = new \Slim\Slim(array(
+// set default conditions for route parameters
+
+
+
+class ResourceNotFoundException extends Exception {}
+
+
+
+
+//$app = new Slim\App();
+
+
+$app = new Slim\App(array(
 
                           'cookies.secret_key' => 'my_secret_key',
                           'debug' => true,
 
                       ));
-
-
-debug_to_console( "main() : Slim app created" );
-
-// set default conditions for route parameters
-
-\Slim\Route::setDefaultConditions(array(
-
-                                      'id' => '[0-9]{1,}',
-
-                                  ));
-
-
-
-class ResourceNotFoundException extends Exception {}
 
 
 // route middleware for simple API authentication
@@ -116,7 +116,6 @@ function authenticate(\Slim\Route $route) {
 }
 
 
-
 function validateUserKey($uid, $key) {
 
     // insert your (hopefully more complex) validation routine here
@@ -132,107 +131,6 @@ function validateUserKey($uid, $key) {
     }
 
 }
-
-
-/* DEPRECATED */
-
-/*
-function getQwizbookPageInput($qsectionIn, $qpageDb) {
-
-    //if (property_exists($qpageDb, "id")) { // should be true always
-
-        for ($x = 0; $x < count($qsectionIn->qwizbookPages); $x++) {
-            debug_to_console ("getQwizbookPageInput() : checking page at input index " . $x);        
-            if (property_exists($qsectionIn->qwizbookPages[$x], "id")) {       
-                debug_to_console ("getQwizbookPageInput() : page id " . $qsectionIn->qwizbookPages[$x]->id);                    
-                if ($qsectionIn->qwizbookPages[$x]->id == $qpageDb->id) {
-                    debug_to_console ("getQwizbookPageInput() : found match for id " . $qpageDb->id);
-                    return $qsectionIn->qwizbookPages[$x];
-                }
-            }
-        }
-                
-   // }    
-
-    debug_to_console ("getQwizbookPageInput() : did not find match for id " . $qpageDb->id);    
-    return NULL;                              
-}
-
-function getQwizbookPage($qsection, $qpage) {
-
-    if (property_exists($qpage, "id")) {
-    
-        foreach( $qsection->xownQwizbookpages as $qwizbookPage ) {
-        
-            if ($qwizbookPage->id == $qpage->id) {
-                debug_to_console ("getQwizbookPage() : found match for id " . $qpage->id);
-                return $qwizbookPage;
-            }
-        }
-    }
-
-    debug_to_console ("getQwizbookPage() : did not find match");        
-    return NULL;                              
-}
-
-
-
-function getQwizbookSectionInput($qbookIn, $qsectionDb) {
-
-    //if (property_exists($qsectionDb, "id")) { // should be true always
-
-        for ($x = 0; $x < count($qbookIn->qwizbookSections); $x++) {
-            debug_to_console (__METHOD__ . "(): checking section at input index " . $x);        
-            if (property_exists($qbookIn->qwizbookSections[$x], "id")) {       
-                debug_to_console (__METHOD__ . "() : section id " . $qbookIn->qwizbookSections[$x]->id);                    
-                if ($qbookIn->qwizbookSections[$x]->id == $qsectionDb->id) {
-                    debug_to_console (__METHOD__ . "() : found match for id " . $qsectionDb->id);
-                    return $qbookIn->qwizbookSections[$x];
-                }
-            }
-        }
-                
-   // }
-    
-    debug_to_console ("getQwizbookSectionInput() : did not find match for id " . $qsectionDb->id);    
-    return NULL;                              
-}
-
-
-
-function getQwizbookSection($qwizbook, $qsection) {
-
-    if (property_exists($qsection, "id")) {
-    
-        foreach( $qwizbook->xownQwizbooksections as $qwizbookSection ) {
-        
-            if ($qwizbookSection->id == $qsection->id) {
-                debug_to_console ("getQwizbookSection() : found match for id " . $qsection->id);
-                return $qwizbookSection;
-            }
-        }
-    }
-
-    debug_to_console ("getQwizbookSection() : did not find match");    
-    return NULL;                              
-}
-
-function deleteQwizbookPage($qsectionDb, $qpageDb) {
-
-    unset($qsectionDb->xownQwizbookpages[$qpageDb->id]);
-    debug_to_console ("deleteQwizbookPages() : deleted qpage " . $qpageDb->id);
-}
-
-function deleteQwizbookSection($qbookDb, $qsectionDb) {
-
-    unset($qbookDb->xownQwizbooksections[$qsectionDb->id]);
-    debug_to_console ("deleteQwizbookSection() : deleted qsection " . $qsectionDb->id);
-}
-
-
-
-*/
-
 
 /******************/
 /* COMMON methods */
@@ -460,49 +358,54 @@ function updateQwizbookSection(&$sectionDb, $sectionIn) {
 
 }
 
+
+
 // Note: adding a trailing slash handles both /qwizbooks and /qwizbooks/
 // handle GET requests for /qwizbook
-$app->get('/qwizbooks/', 'authenticate', function () use ($app) {
+$app->get('/qwizbooks/', function ($request, $response, $args) {
 
-    debug_to_console ("app->get() : url:/qwizbook");                   
+  //  debug_to_console ("app->get() : url:/qwizbook");                   
 
     try {
 
-        $mediaType = $app->request()->getMediaType();
-        $searchString = $app->request()->get('search');
+        $mediaType = $request->getMediaType();
+        $searchString = $request->getQueryParams()['search'];
         debug_to_console ("app->get() : search string = " . $searchString);                           
         $searchLikeString = '%' . $searchString . '%';
         
         $qwizbook = R::find('qwizbook', ' title LIKE ? ', [$searchLikeString]);
 
-        $app->response()->header('Content-Type', 'application/json');
+        $response = $response->withHeader('Content-type', 'application/json');
         
         $export_1 = q_export(json_encode(R::exportAll($qwizbook)));
         $export_2 = "{\"qwizbooks\" : " . $export_1 . "}";
         echo $export_2;
 
+
     } catch (Exception $e) {
 
-        $app->response()->status(400);
-        $app->response()->header('X-Status-Reason', $e->getMessage());
+        $response = $response->withStatus(400);
+        $response = $response->withHeader('X-Status-Reason', $e->getMessage());
+
     }
+
+    return $response;
 
 });
 
-
 // handle GET requests for /qwizbook/:id
-$app->get('/qwizbook/:id', 'authenticate', function ($id) use ($app) {
+$app->get('/qwizbook/[/{id}]', function ($request, $response, $args) {
 
-    debug_to_console ("app->get() : url:/qwizbook/".$id);                   
+    debug_to_console ("app->get() : url:/qwizbook/".$args['id']);                   
     
     try {
 
-        $qwizbook = R::findOne('qwizbook', 'id=?', array($id));
+        $qwizbook = R::findOne('qwizbook', 'id=?', array($args['id']));
 
         if ($qwizbook) {
 
-            $mediaType = $app->request()->getMediaType();
-            $app->response()->header('Content-Type', 'application/json');
+            $mediaType = $request->getMediaType();
+            $response = $response->withHeader('Content-type', 'application/json');
             echo q_export(json_encode(R::exportAll($qwizbook)));
 
         } else {
@@ -512,32 +415,17 @@ $app->get('/qwizbook/:id', 'authenticate', function ($id) use ($app) {
 
     } catch (ResourceNotFoundException $e) {
 
-        $app->response()->status(404);
+        $response = $response->withStatus(404);
 
     } catch (Exception $e) {
 
-        $app->response()->status(400);
-        $app->response()->header('X-Status-Reason', $e->getMessage());
+        $response = $response->withStatus(400);
+        $response = $response->withHeader('X-Status-Reason', $e->getMessage());
     }
 
 });
 
 /*
-$app->post('/vase', 'authenticate', function () use ($app) {
-
-    $shop = R::dispense( 'shop' );
-    $shop->name = 'Antiques';
-    $vase = R::dispense( 'product' );
-    $vase->price = 25;
-    $shop->ownProduct[] = $vase;
-    R::store( $shop );
-             
-    $app->response()->header('Content-Type', 'application/json');   
-    echo json_encode(R::exportAll($shop));   
-});
-
-*/
-
 // handle POST requests for /qwizbook
 $app->post('/qwizbooks/', 'authenticate', function () use ($app) {
 
@@ -734,28 +622,7 @@ $app->delete('/qwizbooks/:id', 'authenticate', function ($id) use ($app) {
 
 });
 
-
-
-// generates a temporary API key using cookies
-// call this first to gain access to API methods
-$app->get('/demo', function () use ($app) {
-
-    try {
-
-        $app->setEncryptedCookie('uid', 'demo', '5 minutes');
-        $app->setEncryptedCookie('key', 'demo', '5 minutes');
-
-    } catch (Exception $e) {
-
-        $app->response()->status(400);
-        $app->response()->header('X-Status-Reason', $e->getMessage());
-    }
-
-});
-
+*/
 
 // run
 $app->run();
-
-
-?>
