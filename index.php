@@ -449,7 +449,7 @@ $app->get('/qwizbooks[/{id}]', function ($request, $response, $args) {
 
 
 // handle POST requests for /qwizbook
-$app->post('/qwizbooks', function ($request, $response, $args) {
+$app->post('/qwizbooks/', function ($request, $response, $args) {
 
     $x_info_log = "";
     header_log($x_info_log, "app->post() : url:/qwizbooks");
@@ -532,7 +532,7 @@ $body =
 
 
 // handle PUT requests for /qwizbook
-$app->put('/qwizbooks[/{id}]', function ($request, $response, $args) {
+$app->put('/qwizbooks[/{id}/]', function ($request, $response, $args) {
 
     debug_to_console ("app->put() : url:/qwizbooks/".$id);                   
     
