@@ -15,6 +15,12 @@
 // Non-composer loads
 require 'vendor/redbean/rb.php';
 
+// Chrome console logger
+require 'vendor/ChromePhp/ChromePhp.php';
+ChromePhp::log('Hello from qwizkool!');
+#ChromePhp::log($_SERVER);
+#ChromePhp::warn('something went wrong!');
+
 // load required files (composer)
 require 'vendor/autoload.php';
 
@@ -23,6 +29,9 @@ require 'vendor/autoload.php';
 
 // Set teh logfile
 //$logfile = 'logs/qkool.log.'.time();
+
+ini_set("display_errors","1");
+error_reporting(E_ALL);
 
 function my_error_handler($error_level, $error_message, $error_file, 
 $error_line) {
@@ -49,6 +58,12 @@ function debug_to_console( $output ) {
     $logfile = 'logs/qkool.log';   
     file_put_contents($logfile, $logstr, FILE_APPEND | LOCK_EX); 
     //file_put_contents($file, $output); 
+}
+
+function header_log(&$header_var, $log ) {
+
+    $header_var .= "[".$log."]##";
+
 }
 
 
@@ -364,13 +379,13 @@ function updateQwizbookSection(&$sectionDb, $sectionIn) {
 // handle GET requests for /qwizbook
 $app->get('/qwizbooks/', function ($request, $response, $args) {
 
-  //  debug_to_console ("app->get() : url:/qwizbook");                   
+    ChromePhp::log("app->get() : url:/qwizbook");                   
 
     try {
 
         $mediaType = $request->getMediaType();
         $searchString = $request->getQueryParams()['search'];
-        debug_to_console ("app->get() : search string = " . $searchString);                           
+        ChromePhp::log("app->get() : search string = " . $searchString);                           
         $searchLikeString = '%' . $searchString . '%';
         
         $qwizbook = R::find('qwizbook', ' title LIKE ? ', [$searchLikeString]);
@@ -394,13 +409,18 @@ $app->get('/qwizbooks/', function ($request, $response, $args) {
 });
 
 // handle GET requests for /qwizbook/:id
-$app->get('/qwizbook/[/{id}]', function ($request, $response, $args) {
+$app->get('/qwizbook[/{id}]', function ($request, $response, $args) {
 
-    debug_to_console ("app->get() : url:/qwizbook/".$args['id']);                   
+    ChromePhp::log("app->get() : url:/qwizbook/".$args['id']);                   
+
     
     try {
 
+	ChromePhp::log("Search for qwizbook id ". $args['id']);
+
         $qwizbook = R::findOne('qwizbook', 'id=?', array($args['id']));
+	
+	ChromePhp::log("Found ". $qwizbook);
 
         if ($qwizbook) {
 
@@ -423,24 +443,53 @@ $app->get('/qwizbook/[/{id}]', function ($request, $response, $args) {
         $response = $response->withHeader('X-Status-Reason', $e->getMessage());
     }
 
+    return $response;	
+
 });
 
-/*
-// handle POST requests for /qwizbook
-$app->post('/qwizbooks/', 'authenticate', function () use ($app) {
 
-    debug_to_console ("app->post() : url:/qwizbooks");                   
+// handle POST requests for /qwizbook
+$app->post('/qwizbooks', function ($request, $response, $args) {
+
+    $x_info_log = "";
+    header_log($x_info_log, "app->post() : url:/qwizbooks");
         
     try {
 
-        $request = $app->request();
         $mediaType = $request->getMediaType();
+        header_log($x_info_log, "app->post() : mediaType :". $mediaType);
+
         $body = $request->getBody();
+
+/*     
+//$body = '{ "qwizbook": {"id": "1","title": "Qwizbook 2"}}';
+//$body ='{"a":1,"b":"vinod","c":3,"d":4,"e":{"f":100}}';
+$body = 
+'{
+  "qwizbook": 
+    {
+      "id": "1",
+      "title": "Qwizbook 1",
+      "subtitle": "An awesome learning experience",
+      "description": "A qwizbook",
+      "category": "uncategorized",
+      "tags": "great cool",
+      "owner": "kgvinod@gmail.com",
+      "created_on": "2015-09-20T18:59:12.337Z",
+      "public": "true",
+      "sharing_enabled": "true",
+      "shared_with": "none"
+    }
+}';
+*/
+
 
         if ($mediaType == 'application/json') {
             //echo "app->post: decode json\r\n";
             $input = json_decode($body)->qwizbook;
         }
+     
+        header_log($x_info_log, "app->post() : Qwizbook Title :". (string)$input->title);
 
         $qwizbook = R::dispense('qwizbook');
         $qwizbook->title = (string)$input->title;
@@ -461,22 +510,26 @@ $app->post('/qwizbooks/', 'authenticate', function () use ($app) {
 
         $id = R::store($qwizbook);
         
-	    //echo "app->post: id=$id\r\n";
-
+        header_log($x_info_log, "app->post() : created id " . $id);
 
         if ($mediaType == 'application/json') {
-            $app->response()->header('Content-Type', 'application/json');
+            $response = $response->withHeader('Content-Type', 'application/json');
             echo q_export(json_encode(R::exportAll($qwizbook)));
         }
 
     } catch (Exception $e) {
-        $app->response()->status(400);
-        $app->response()->header('X-Status-Reason', 'line ' . $e->getLine() . ":" . $e->getMessage());
+
+        $response = $response->withStatus(400);
+        $response = $response->withHeader('X-Status-Reason', 'line ' . $e->getLine() . ":" . $e->getMessage());
+
     }
+
+    $response = $response->withHeader('X-Info-Log', $x_info_log);
+    return $response;	
 
 });
 
-
+/*
 
 // handle PUT requests for /qwizbook
 
