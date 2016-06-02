@@ -401,10 +401,13 @@ $app->get('/qwizbooks/', function ($request, $response, $args) {
 
         $response = $response->withStatus(400);
         $response = $response->withHeader('X-Status-Reason', $e->getMessage());
-
     }
 
+    // Support swagger's cross domain request
+    $response = $response->withHeader('Access-Control-Allow-Origin', 'http://swagger.qwizkool.com'); 
+
     return $response;
+
 
 });
 
@@ -442,6 +445,9 @@ $app->get('/qwizbooks[/{id}]', function ($request, $response, $args) {
         $response = $response->withStatus(400);
         $response = $response->withHeader('X-Status-Reason', $e->getMessage());
     }
+
+    // Support swagger's cross domain request
+    $response = $response->withHeader('Access-Control-Allow-Origin', 'http://swagger.qwizkool.com'); 
 
     return $response;	
 
@@ -525,6 +531,10 @@ $body =
     }
 
     $response = $response->withHeader('X-Info-Log', $x_info_log);
+
+    // Support swagger's cross domain request
+    $response = $response->withHeader('Access-Control-Allow-Origin', 'http://swagger.qwizkool.com'); 
+
     return $response;	
 
 });
@@ -637,6 +647,9 @@ $app->put('/qwizbooks[/{id}/]', function ($request, $response, $args) {
         $response = $response->withHeader('X-Status-Reason', ' [file:] ' . $e->getFile() . ' [line:] ' . $e->getLine() . ":" . $e->getMessage());
     }
 
+    // Support swagger's cross domain request
+    $response = $response->withHeader('Access-Control-Allow-Origin', 'http://swagger.qwizkool.com'); 
+
     return $response;	
 
 });
@@ -671,10 +684,29 @@ $app->delete('/qwizbooks[/{id}]', function ($request, $response, $args) {
         $response = $response->withHeader('X-Status-Reason', 'line ' . $e->getLine() . ":" . $e->getMessage());
     }
     
+
+    // Support swagger's cross domain request
+    $response = $response->withHeader('Access-Control-Allow-Origin', 'http://swagger.qwizkool.com'); 
+
     return $response;	
 
 });
 
+
+// handle OPTIONS requests for /qwizbook
+$app->options('[/{params:.*}]', function ($request, $response, $args) {
+
+    $response = $response->withStatus(200);
+
+    // Support swagger's cross domain request
+    $response = $response->withHeader('Access-Control-Allow-Headers', 'origin, content-type, accept, accept-language, content-type'); 
+    $response = $response->withHeader('Access-Control-Allow-Origin', 'http://swagger.qwizkool.com');
+    $response = $response->withHeader('Access-Control-Allow-Methods', 'POST, GET, PUT, OPTIONS, DELETE');  
+
+
+    return $response;	
+
+});
 
 
 // run
