@@ -33,6 +33,10 @@ require 'vendor/autoload.php';
 ini_set("display_errors","1");
 error_reporting(E_ALL);
 
+// Allow CORS
+//header('Access-Control-Allow-Origin: http://swagger.qwizkool.com'); 
+
+
 function my_error_handler($error_level, $error_message, $error_file, 
 $error_line) {
 
@@ -412,7 +416,7 @@ $app->get('/qwizbooks/', function ($request, $response, $args) {
 });
 
 // handle GET requests for /qwizbook/:id
-$app->get('/qwizbooks[/{id}]', function ($request, $response, $args) {
+$app->get('/qwizbooks[/{id}[/]]', function ($request, $response, $args) {
 
     ChromePhp::log("app->get() : url:/qwizbook/".$args['id']);                   
 
@@ -542,9 +546,9 @@ $body =
 
 
 // handle PUT requests for /qwizbook
-$app->put('/qwizbooks[/{id}/]', function ($request, $response, $args) {
+$app->put('/qwizbooks[/{id}[/]]', function ($request, $response, $args) {
 
-    debug_to_console ("app->put() : url:/qwizbooks/".$id);                   
+    ChromePhp::log("app->put() : url:/qwizbook/".$args['id']);                                
     
     try {
  
