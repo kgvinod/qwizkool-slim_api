@@ -87,7 +87,10 @@ function q_export($output) {
 
 // set up database connection
 //R::setup('mysql:host=localhost;dbname=appdata','user','pass');
-R::setup('sqlite:qwizkool.db'); //sqlite
+$database_string = 'sqlite:' . '../../database/qwizkool.db';
+//error_log($database_string, 0);
+R::setup($database_string); //sqlite
+ChromePhp::log('sqlite db created!');
 //R::freeze(true);
 //R::setStrictTyping(false);  // Allow uppercase
 //R::ext('xdispense', function($type){
@@ -119,6 +122,7 @@ $app = new Slim\App(array(
 
                       ));
 
+ChromePhp::log('Slim app created');
 
 // route middleware for simple API authentication
 function authenticate(\Slim\Route $route) {
