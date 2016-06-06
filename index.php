@@ -30,6 +30,7 @@ require 'vendor/autoload.php';
 // Set teh logfile
 //$logfile = 'logs/qkool.log.'.time();
 
+// Enable logging to file
 ini_set("display_errors","1");
 error_reporting(E_ALL);
 
